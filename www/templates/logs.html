@@ -1,0 +1,129 @@
+{% extends '__base__.html' %}
+
+{% block title %}日志{% endblock %}
+
+{% block beforehead %}
+<script>
+
+$(function() {
+    var vmAuth = new Vue({
+        el: '#vm1',
+        data: {
+            email: '',
+            passwd: ''
+        },
+        methods: {
+            submit: function(event) {
+                event.preventDefault();
+                var
+                    $form = $('#vm1'),
+                    email = this.email.trim().toLowerCase(),
+                    data = {
+                        email: email,
+                        passwd: this.passwd==='' ? '' : CryptoJS.SHA1(email + ':' + this.passwd).toString()
+                    };
+                $form.postJSON('/api/update', data, function(err, result) {
+                    if (! err) {
+                        alert('update finished!')
+                        location.assign('/');
+                    }
+                });
+            }
+        }
+    });
+});
+
+</script>
+{% endblock %}
+
+{% block topmenu %}
+    <form id="vm1" v-on:submit="submit">
+        <button type="submit" class="uk-button uk-button-primary uk-button-small">
+            <i class="uk-icon-plus"></i> Add
+        </button>
+    </form>
+    <hr>
+{% endblock %}
+
+{% block leftmenu %}
+    <div class="uk-panel uk-panel-box">
+        <ul class="uk-nav uk-nav-side">
+            {% for entry in containers %}
+                {% if entry['Names'][0][1:] == selected %}
+                    <li class="uk-active"><a href="/{{ entry['Names'][0][1:] }}">{{ entry['Names'][0][1:] }}</a></li>
+                {% else %}
+                    <li><a href="/{{ entry['Names'][0][1:] }}">{{ entry['Names'][0][1:] }}</a></li>
+                {% endif%}
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock %}
+
+{% block content %}
+    <div class="uk-overflow-container">
+        <table class="uk-table">
+            <caption></caption>
+            <thead>
+                <tr>
+                    <th>Job Name</th>
+                    <th>Job Status</th>
+                    <th>Load</th>
+                    <th>Last Run Time</th>
+                    <th>Phone</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in logs %}
+                <tr valign="middle">
+                    <td><a href="/blog/{{ entry['_id'] }}">{{ entry['job_name'] }}</a></td>
+                    {% if entry['job_status'] == 1 %}
+                    <td>Running</td>
+                    {% elif entry['job_status'] == 0 %}
+                    <td>Finished</td>
+                    {% else %}
+                    <td>Aborting</td>
+                    {% endif %}
+                    <td>
+                        <table border="0">
+                            {% for entry in entry['load_names'].split(',') %}
+                            <tr>
+                                <td>{{ entry }}</td>
+                            </tr>
+                            {% endfor %}
+                        </table>
+                    </td>
+                    <td class="uk-article-meta">{{ entry['startTime'] }}</td>
+                    <td width="100">
+                        <table class="uk-table" border="1" cellpadding="0" cellspacing="0">
+                            {% for entry in entry['ips'].split(',') %}
+                            <tr>
+                                <td>{{ entry }}</td>
+                            </tr>
+                            {% endfor %}
+                        </table>
+                    </td>
+                    <td width="130">
+                        <nav class="uk-navbar">
+                            <ul class="uk-navbar-nav">
+                                <li data-url="">
+                                    <a href="/job/{{ entry['test_bed'] }}/{{ entry['job_name'] }}/start">
+                                        <i class="uk-icon-play"></i>
+                                    </a>
+                                </li>
+                                <li data-url="">
+                                    <a href="/job/{{ entry['job_name'] }}/stop"><i class="uk-icon-stop"></i></a>
+                                </li>
+                                <li data-url="">
+                                    <a href="/job/{{ entry['job_name'] }}/reset"><i class="uk-icon-repeat"></i></a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {{ pagination('?page=', selected, page) }}
+{% endblock %}
