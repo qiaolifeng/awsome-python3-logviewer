@@ -78,27 +78,27 @@ $(function() {
                 <tr valign="middle">
                     <td><a href="/blog/{{ entry['_id'] }}">{{ entry['job_name'] }}</a></td>
                     {% if entry['job_status'] == 1 %}
-                    <td>Running</td>
+                    <td style="color:green">Running</td>
                     {% elif entry['job_status'] == 0 %}
                     <td>Finished</td>
                     {% else %}
                     <td>Aborting</td>
                     {% endif %}
                     <td>
-                        <table border="0">
+                        <table style="border:0">
                             {% for entry in entry['load_names'].split(',') %}
                             <tr>
-                                <td>{{ entry }}</td>
+                                <td style="padding:0">{{ entry }}</td>
                             </tr>
                             {% endfor %}
                         </table>
                     </td>
                     <td class="uk-article-meta">{{ entry['startTime'] }}</td>
                     <td width="100">
-                        <table class="uk-table" border="1" cellpadding="0" cellspacing="0">
+                        <table style="border:0">
                             {% for entry in entry['ips'].split(',') %}
                             <tr>
-                                <td>{{ entry }}</td>
+                                <td style="padding:0">{{ entry }}</td>
                             </tr>
                             {% endfor %}
                         </table>
